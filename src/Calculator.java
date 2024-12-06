@@ -11,6 +11,7 @@ public class Calculator implements ActionListener{
 
     boolean isOperatorClicked=false;
     String oldValue;
+    String currentOperator="";
 
     JFrame jf;
     JLabel displayLabel;
@@ -230,26 +231,72 @@ public class Calculator implements ActionListener{
             }else{
                 displayLabel.setText(displayLabel.getText()+"0");
             }
-        }else if(e.getSource()==equalButton){
-            String newValue=displayLabel.getText();
-            float oldValueF=Float.parseFloat(oldValue);
-            float newValueF=Float.parseFloat(newValue);
+        }else if (e.getSource() == equalButton) {
+            if (currentOperator.isEmpty()) {
+                // No operator selected, show error
+                displayLabel.setText("Invalid operation");
+                return; // Exit early
+            }
 
-            float result=oldValueF+newValueF;
-            displayLabel.setText(result+ "");
+            String newValue = displayLabel.getText();
+            try {
+                float oldValueF = Float.parseFloat(oldValue);
+                float newValueF = Float.parseFloat(newValue);
 
-        }else if(e.getSource()==divButton){
-            displayLabel.setText("/");
-        }else if(e.getSource()==multiButton){
-            displayLabel.setText("x");
-        }else if(e.getSource()==subButton){
-            displayLabel.setText("-");
-        }else if(e.getSource()==addButton){
-            isOperatorClicked=true;
-            oldValue=displayLabel.getText();    
+                float result = 0; // Declare result
+
+                // Perform the operation based on the selected operator
+                switch (currentOperator) {
+                    case "+":
+                        result = oldValueF + newValueF;
+                        break;
+                    case "-":
+                        result = oldValueF - newValueF;
+                        break;
+                    case "*":
+                        result = oldValueF * newValueF;
+                        break;
+                    case "/":
+                        if (newValueF != 0) {
+                            result = oldValueF / newValueF;
+                        } else {
+                            displayLabel.setText("Error: Division by zero");
+                            return; // Exit early
+                        }
+                        break;
+                    default:
+                        displayLabel.setText("Invalid operation");
+                        return; // Exit early
+                }
+
+                // Update the display with the result
+                displayLabel.setText(String.valueOf(result));
+                currentOperator = ""; // Reset the operator after calculation
+
+            } catch (NumberFormatException ex) {
+                // Handle invalid number inputs
+                displayLabel.setText("Error");
+            }
+            } else if (e.getSource() == divButton) {
+                currentOperator = "/";
+                oldValue = displayLabel.getText();
+                displayLabel.setText(""); // Clear for new value input
+            } else if (e.getSource() == multiButton) {
+                currentOperator = "*";
+                oldValue = displayLabel.getText();
+                displayLabel.setText("");
+            } else if (e.getSource() == subButton) {
+                currentOperator = "-";
+                oldValue = displayLabel.getText();
+                displayLabel.setText("");
+            } else if (e.getSource() == addButton) {
+                currentOperator = "+";
+                oldValue = displayLabel.getText();
+                displayLabel.setText("");
+            } else if (e.getSource() == clearButton) {
+                displayLabel.setText("");
+                oldValue = "";
+                currentOperator = "";
+            } 
         }
-        else if(e.getSource()==clearButton){
-            displayLabel.setText("");
-        }
-    }
 }
