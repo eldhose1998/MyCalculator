@@ -10,8 +10,8 @@ import javax.swing.SwingConstants;
 public class Calculator implements ActionListener{
 
     boolean isOperatorClicked=false;
-    String oldValue;
     String currentOperator="";
+    float runningTotal=0;
 
     JFrame jf;
     JLabel displayLabel;
@@ -232,71 +232,89 @@ public class Calculator implements ActionListener{
                 displayLabel.setText(displayLabel.getText()+"0");
             }
         }else if (e.getSource() == equalButton) {
-            if (currentOperator.isEmpty()) {
-                // No operator selected, show error
-                displayLabel.setText("Invalid operation");
-                return; // Exit early
-            }
-
-            String newValue = displayLabel.getText();
             try {
-                float oldValueF = Float.parseFloat(oldValue);
-                float newValueF = Float.parseFloat(newValue);
+        float newValue = Float.parseFloat(displayLabel.getText());
 
-                float result = 0; // Declare result
+        // Perform the final operation
+        if (!currentOperator.isEmpty()) {
+            switch (currentOperator) {
+                case "+":
+                    runningTotal += newValue;
+                    break;
+                case "-":
+                    runningTotal -= newValue;
+                    break;
+                case "*":
+                    runningTotal *= newValue;
+                    break;
+                case "/":
+                    if (newValue != 0) {
+                        runningTotal /= newValue;
+                    } else {
+                        displayLabel.setText("Error: Division by zero");
+                        return;
+                    }
+                    break;
+                default:
+                    displayLabel.setText("Invalid operation");
+                    return;
+            }
+        }
 
-                // Perform the operation based on the selected operator
+        // Show final result
+        displayLabel.setText(String.valueOf(runningTotal));
+        currentOperator = ""; // Reset operator after calculation
+
+    } catch (NumberFormatException ex) {
+        displayLabel.setText("Error");
+    }
+    } else if (e.getSource() == addButton || e.getSource() == subButton || e.getSource() == multiButton || e.getSource() == divButton) {
+        try {
+            float newValue = Float.parseFloat(displayLabel.getText());
+
+            // Apply the current operator to update runningTotal
+            if (!currentOperator.isEmpty()) {
                 switch (currentOperator) {
                     case "+":
-                        result = oldValueF + newValueF;
+                        runningTotal += newValue;
                         break;
                     case "-":
-                        result = oldValueF - newValueF;
+                        runningTotal -= newValue;
                         break;
                     case "*":
-                        result = oldValueF * newValueF;
+                        runningTotal *= newValue;
                         break;
                     case "/":
-                        if (newValueF != 0) {
-                            result = oldValueF / newValueF;
+                        if (newValue != 0) {
+                            runningTotal /= newValue;
                         } else {
                             displayLabel.setText("Error: Division by zero");
-                            return; // Exit early
+                            return;
                         }
                         break;
                     default:
-                        displayLabel.setText("Invalid operation");
-                        return; // Exit early
+                        break;
                 }
-
-                // Update the display with the result
-                displayLabel.setText(String.valueOf(result));
-                currentOperator = ""; // Reset the operator after calculation
-
-            } catch (NumberFormatException ex) {
-                // Handle invalid number inputs
-                displayLabel.setText("Error");
+            } else {
+                // First number input sets the runningTotal
+                runningTotal = newValue;
             }
-            } else if (e.getSource() == divButton) {
-                currentOperator = "/";
-                oldValue = displayLabel.getText();
-                displayLabel.setText(""); // Clear for new value input
-            } else if (e.getSource() == multiButton) {
-                currentOperator = "*";
-                oldValue = displayLabel.getText();
-                displayLabel.setText("");
-            } else if (e.getSource() == subButton) {
-                currentOperator = "-";
-                oldValue = displayLabel.getText();
-                displayLabel.setText("");
-            } else if (e.getSource() == addButton) {
-                currentOperator = "+";
-                oldValue = displayLabel.getText();
-                displayLabel.setText("");
+
+            // Set the new operator and clear for the next number
+            if (e.getSource() == addButton) currentOperator = "+";
+            if (e.getSource() == subButton) currentOperator = "-";
+            if (e.getSource() == multiButton) currentOperator = "*";
+            if (e.getSource() == divButton) currentOperator = "/";
+            displayLabel.setText("");
+            } catch (NumberFormatException ex) {
+                    displayLabel.setText("Error");
+                }
             } else if (e.getSource() == clearButton) {
-                displayLabel.setText("");
-                oldValue = "";
+                // Reset everything
+                runningTotal = 0;
                 currentOperator = "";
-            } 
+                displayLabel.setText("");
+                isOperatorClicked = false;
+            }
         }
 }
